@@ -55,10 +55,12 @@ export interface Task {
   status: 'queued' | 'in-progress' | 'completed' | 'failed';
 }
 
+export type CameraPosition = 'front' | 'down' | 'left' | 'right' | 'rear' | 'top';
+
 export interface Camera {
   id: string;
   label: string;
-  position: 'front' | 'down' | 'left' | 'right' | 'rear' | 'top';
+  position: CameraPosition;
   streamUrl?: string;
   privacyShieldEnabled: boolean;
   recording: boolean;

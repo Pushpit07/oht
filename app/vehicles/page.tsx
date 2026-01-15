@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Grid2X2, List, Eye, Settings2 } from 'lucide-react';
+import { Search, Grid2X2, List, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -102,9 +102,10 @@ export default function VehiclesPage() {
   const [statusFilter, setStatusFilter] = useState<OHTStatus | 'all'>('all');
 
   const setVehicles = useFleetStore((s) => s.setVehicles);
-  const getFilteredVehicles = useFleetStore((s) => s.getFilteredVehicles);
+  const vehiclesList = useFleetStore((s) => s.vehiclesList);
   const searchQuery = useFleetStore((s) => s.searchQuery);
   const setSearchQuery = useFleetStore((s) => s.setSearchQuery);
+  const storeStatusFilter = useFleetStore((s) => s.statusFilter);
   const fleetSetStatusFilter = useFleetStore((s) => s.setStatusFilter);
 
   useEffect(() => {
@@ -119,7 +120,25 @@ export default function VehiclesPage() {
     }
   }, [statusFilter, fleetSetStatusFilter]);
 
-  const vehicles = getFilteredVehicles();
+  const vehicles = useMemo(() => {
+    let filtered = vehiclesList;
+
+    if (storeStatusFilter.length > 0) {
+      filtered = filtered.filter((v) => storeStatusFilter.includes(v.status));
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (v) =>
+          v.id.toLowerCase().includes(query) ||
+          v.name.toLowerCase().includes(query) ||
+          v.position.bay?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [vehiclesList, storeStatusFilter, searchQuery]);
 
   return (
     <div className="flex flex-col gap-6 p-6">

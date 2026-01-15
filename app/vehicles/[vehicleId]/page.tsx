@@ -11,6 +11,7 @@ import { CameraGrid } from '@/components/dashboard/vehicle-control/camera-grid';
 import { TelemetryPanel } from '@/components/dashboard/vehicle-control/telemetry-panel';
 import { ControlPanel } from '@/components/dashboard/vehicle-control/control-panel';
 import { CommandSequencePanel } from '@/components/dashboard/vehicle-control/command-sequence-panel';
+import { OHTModel } from '@/components/dashboard/vehicle-control/oht-model';
 import { StatusIndicator } from '@/components/shared/status-indicator';
 import { SafetyBadge, ConnectionBadge } from '@/components/shared/safety-badge';
 import { ViewModeToggle } from '@/components/shared/view-mode-toggle';
@@ -23,6 +24,7 @@ export default function VehicleControlPage() {
   const router = useRouter();
   const vehicleId = params.vehicleId as string;
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCameraId, setSelectedCameraId] = useState<string | undefined>();
 
   const setVehicles = useFleetStore((s) => s.setVehicles);
   const getVehicleById = useFleetStore((s) => s.getVehicleById);
@@ -35,6 +37,13 @@ export default function VehicleControlPage() {
   }, [setVehicles]);
 
   const vehicle = getVehicleById(vehicleId);
+
+  // Initialize selected camera when vehicle loads
+  useEffect(() => {
+    if (vehicle && !selectedCameraId) {
+      setSelectedCameraId(vehicle.cameras[0]?.id);
+    }
+  }, [vehicle, selectedCameraId]);
 
   const handleCommand = async (command: ControlCommand) => {
     // Simulate command execution
@@ -146,17 +155,27 @@ export default function VehicleControlPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Camera Grid - Takes 2 columns */}
-          <div className="lg:col-span-2 space-y-4">
-            <CameraGrid cameras={vehicle.cameras} vehicleId={vehicle.id} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Left Side - Camera Grid, Command Sequences, Control Panel */}
+          <div className="space-y-4">
+            <CameraGrid
+              cameras={vehicle.cameras}
+              vehicleId={vehicle.id}
+              selectedCameraId={selectedCameraId}
+              onCameraSelect={setSelectedCameraId}
+            />
             <CommandSequencePanel vehicle={vehicle} onCommand={handleCommand} />
+            <ControlPanel vehicle={vehicle} onCommand={handleCommand} />
           </div>
 
-          {/* Right Sidebar - Telemetry & Controls */}
+          {/* Right Side - OHT Model, Telemetry */}
           <div className="space-y-4">
+            <OHTModel
+              cameras={vehicle.cameras}
+              selectedCameraId={selectedCameraId}
+              onCameraSelect={setSelectedCameraId}
+            />
             <TelemetryPanel vehicle={vehicle} />
-            <ControlPanel vehicle={vehicle} onCommand={handleCommand} />
           </div>
         </div>
       </div>
