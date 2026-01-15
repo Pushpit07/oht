@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, RefreshCw } from 'lucide-react';
+import { ChevronLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -22,6 +22,7 @@ export default function VehicleControlPage() {
   const params = useParams();
   const router = useRouter();
   const vehicleId = params.vehicleId as string;
+  const [isLoading, setIsLoading] = useState(true);
 
   const setVehicles = useFleetStore((s) => s.setVehicles);
   const getVehicleById = useFleetStore((s) => s.getVehicleById);
@@ -30,6 +31,7 @@ export default function VehicleControlPage() {
   // Initialize with mock data
   useEffect(() => {
     setVehicles(mockFleet);
+    setIsLoading(false);
   }, [setVehicles]);
 
   const vehicle = getVehicleById(vehicleId);
@@ -79,6 +81,17 @@ export default function VehicleControlPage() {
       });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="size-8 animate-spin mx-auto text-muted-foreground" />
+          <p className="mt-4 text-muted-foreground">Loading vehicle data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!vehicle) {
     return (
