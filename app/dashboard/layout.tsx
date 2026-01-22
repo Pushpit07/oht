@@ -11,7 +11,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Home,
+  Search,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -24,34 +24,34 @@ import { useAlertsStore } from '@/stores/alerts-store';
 
 const navigation = [
   {
-    name: 'Home',
-    href: '/',
-    icon: Home,
+    name: 'Alerts',
+    href: '/dashboard',
+    icon: Bell,
   },
   {
     name: 'Fleet Overview',
-    href: '/dashboard',
+    href: '/dashboard/fleet-overview',
     icon: LayoutDashboard,
   },
   {
-    name: 'Vehicles',
-    href: '/vehicles',
-    icon: Truck,
+    name: 'Search',
+    href: '/dashboard/search',
+    icon: Search,
   },
-  {
-    name: 'Live View',
-    href: '/dashboard/live-view',
-    icon: MonitorPlay,
-  },
+  // {
+  //   name: 'Vehicles',
+  //   href: '/vehicles',
+  //   icon: Truck,
+  // },
+  // {
+  //   name: 'Live View',
+  //   href: '/dashboard/live-view',
+  //   icon: MonitorPlay,
+  // },
   {
     name: 'Track Map',
     href: '/dashboard/track-map',
     icon: Map,
-  },
-  {
-    name: 'Alerts',
-    href: '/dashboard/alerts',
-    icon: Bell,
   },
 ];
 
@@ -61,7 +61,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const unacknowledgedCount = useAlertsStore((s) => s.unacknowledgedCount);
   const criticalCount = useAlertsStore((s) => s.criticalCount);
 
@@ -83,7 +83,7 @@ export default function DashboardLayout({
                   <Truck className="size-5 text-primary-foreground" />
                 </div>
                 <span className="font-semibold text-sidebar-foreground">
-                  OHT Monitor
+                  Remotify
                 </span>
               </Link>
             )}
@@ -107,9 +107,9 @@ export default function DashboardLayout({
               {navigation.map((item) => {
                 const isActive =
                   (item.href === '/dashboard' && pathname === '/dashboard') ||
-                  (item.href !== '/' && item.href !== '/dashboard' && pathname.startsWith(item.href));
+                  (item.href !== '/dashboard' && pathname.startsWith(item.href));
                 const Icon = item.icon;
-                const showBadge = item.href === '/dashboard/alerts' && unacknowledgedCount > 0;
+                const showBadge = item.href === '/dashboard' && unacknowledgedCount > 0;
 
                 const navItem = (
                   <Link

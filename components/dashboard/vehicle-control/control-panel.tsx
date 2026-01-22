@@ -27,9 +27,10 @@ import type { OHTVehicle, ControlCommand } from '@/types/oht';
 interface ControlPanelProps {
   vehicle: OHTVehicle;
   onCommand: (command: ControlCommand) => Promise<void>;
+  className?: string;
 }
 
-export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
+export function ControlPanel({ vehicle, onCommand, className }: ControlPanelProps) {
   const [manualSpeed, setManualSpeed] = useState(50);
   const [isExecuting, setIsExecuting] = useState<ControlCommand | null>(null);
 
@@ -48,11 +49,14 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
     vehicle.operationalState === 'e-stopped';
 
   return (
-    <Card>
-      <CardHeader className="py-3">
+    <Card className={cn('flex flex-col', className)}>
+      <CardHeader className="flex flex-row items-center justify-between py-3">
         <CardTitle className="text-base">Control Panel</CardTitle>
+        {isEsopActive && (
+          <span className="text-xs font-medium text-red-500">E-Stop Active</span>
+        )}
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex-1 space-y-2">
         {/* Emergency Stop */}
         <EmergencyStopButton
           vehicleId={vehicle.id}
@@ -61,16 +65,16 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
         />
 
         {/* Primary Controls */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-12"
+                className="h-9"
                 onClick={() => handleCommand('pause')}
                 disabled={isPaused || isExecuting !== null}
               >
-                <Pause className="size-5" />
+                <Pause className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Pause Vehicle</TooltipContent>
@@ -80,11 +84,11 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-12"
+                className="h-9"
                 onClick={() => handleCommand('resume')}
                 disabled={!isPaused || isEsopActive || isExecuting !== null}
               >
-                <Play className="size-5" />
+                <Play className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Resume Operation</TooltipContent>
@@ -94,11 +98,11 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-12"
+                className="h-9"
                 onClick={() => handleCommand('reset')}
                 disabled={!isEsopActive || isExecuting !== null}
               >
-                <RotateCcw className="size-5" />
+                <RotateCcw className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Reset E-Stop</TooltipContent>
@@ -108,11 +112,11 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-12"
+                className="h-9"
                 onClick={() => handleCommand('home')}
                 disabled={isEsopActive || isExecuting !== null}
               >
-                <Home className="size-5" />
+                <Home className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Return to Home</TooltipContent>
@@ -122,27 +126,27 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
         <Separator />
 
         {/* Manual Controls */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Manual Controls</span>
+            <span className="text-xs font-medium">Manual Controls</span>
             <span className="text-xs text-muted-foreground">
               Requires authorization
             </span>
           </div>
 
           {/* Movement Controls */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-12"
+                  className="h-8 text-xs"
                   onMouseDown={() => handleCommand('manual-reverse')}
                   onMouseUp={() => handleCommand('manual-stop')}
                   onMouseLeave={() => handleCommand('manual-stop')}
                   disabled={isEsopActive || isExecuting !== null}
                 >
-                  <ChevronLeft className="size-5" />
+                  <ChevronLeft className="size-4" />
                   Reverse
                 </Button>
               </TooltipTrigger>
@@ -151,11 +155,11 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
 
             <Button
               variant="outline"
-              className="h-12"
+              className="h-8 text-xs"
               onClick={() => handleCommand('manual-stop')}
               disabled={isEsopActive}
             >
-              <Square className="size-5" />
+              <Square className="size-4" />
               Stop
             </Button>
 
@@ -163,14 +167,14 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-12"
+                  className="h-8 text-xs"
                   onMouseDown={() => handleCommand('manual-forward')}
                   onMouseUp={() => handleCommand('manual-stop')}
                   onMouseLeave={() => handleCommand('manual-stop')}
                   disabled={isEsopActive || isExecuting !== null}
                 >
                   Forward
-                  <ChevronRight className="size-5" />
+                  <ChevronRight className="size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Move Forward (Hold)</TooltipContent>
@@ -178,10 +182,10 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
           </div>
 
           {/* Speed Slider */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Manual Speed</span>
-              <span className="text-sm font-medium tabular-nums">
+              <span className="text-xs text-muted-foreground">Manual Speed</span>
+              <span className="text-xs font-medium tabular-nums">
                 {manualSpeed}%
               </span>
             </div>
@@ -195,12 +199,12 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
           </div>
 
           {/* Gripper Controls */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5 pt-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10"
+                  className="h-8 text-xs"
                   onClick={() => handleCommand('gripper-open')}
                   disabled={
                     isEsopActive ||
@@ -208,7 +212,7 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
                     isExecuting !== null
                   }
                 >
-                  <Grip className="mr-2 size-4" />
+                  <Grip className="mr-1 size-3" />
                   Open Gripper
                 </Button>
               </TooltipTrigger>
@@ -219,7 +223,7 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-10"
+                  className="h-8 text-xs"
                   onClick={() => handleCommand('gripper-close')}
                   disabled={
                     isEsopActive ||
@@ -227,7 +231,7 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
                     isExecuting !== null
                   }
                 >
-                  <Grip className="mr-2 size-4" />
+                  <Grip className="mr-1 size-3" />
                   Close Gripper
                 </Button>
               </TooltipTrigger>
@@ -235,18 +239,6 @@ export function ControlPanel({ vehicle, onCommand }: ControlPanelProps) {
             </Tooltip>
           </div>
         </div>
-
-        {/* Status Indicator */}
-        {isEsopActive && (
-          <div className="rounded-lg bg-red-500/10 p-3 text-center text-sm">
-            <span className="font-medium text-red-500">
-              Emergency Stop is Active
-            </span>
-            <p className="text-xs text-muted-foreground mt-1">
-              Manual reset required to resume operation
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

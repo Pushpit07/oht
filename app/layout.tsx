@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OHT Monitor - Infineon",
-  description: "Overhead Hoist Transport Monitoring and Remote Control System",
+  title: "Remotify - Infineon",
+  description: "Remote Vehicle Monitoring and Control System",
 };
 
 export default function RootLayout({

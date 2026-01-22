@@ -7,14 +7,13 @@ import { ChevronLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { CameraGrid } from '@/components/dashboard/vehicle-control/camera-grid';
 import { TelemetryPanel } from '@/components/dashboard/vehicle-control/telemetry-panel';
 import { ControlPanel } from '@/components/dashboard/vehicle-control/control-panel';
 import { CommandSequencePanel } from '@/components/dashboard/vehicle-control/command-sequence-panel';
 import { OHTModel } from '@/components/dashboard/vehicle-control/oht-model';
+import { VehicleAlertsPanel } from '@/components/dashboard/vehicle-control/vehicle-alerts-panel';
 import { StatusIndicator } from '@/components/shared/status-indicator';
 import { SafetyBadge, ConnectionBadge } from '@/components/shared/safety-badge';
-import { ViewModeToggle } from '@/components/shared/view-mode-toggle';
 import { useFleetStore } from '@/stores/fleet-store';
 import { mockFleet } from '@/lib/mock-data';
 import type { ControlCommand } from '@/types/oht';
@@ -24,6 +23,7 @@ export default function VehicleControlPage() {
   const router = useRouter();
   const vehicleId = params.vehicleId as string;
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCameraId, setSelectedCameraId] = useState<string | undefined>();
 
   const setVehicles = useFleetStore((s) => s.setVehicles);
@@ -44,6 +44,14 @@ export default function VehicleControlPage() {
       setSelectedCameraId(vehicle.cameras[0]?.id);
     }
   }, [vehicle, selectedCameraId]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setVehicles(mockFleet);
+    setIsRefreshing(false);
+  };
 
   const handleCommand = async (command: ControlCommand) => {
     // Simulate command execution
@@ -87,6 +95,54 @@ export default function VehicleControlPage() {
       updateVehicle(vehicleId, {
         status: 'active',
         operationalState: 'moving',
+      });
+    } else if (command === 'home') {
+      updateVehicle(vehicleId, {
+        status: 'active',
+        operationalState: 'moving',
+        telemetry: {
+          ...vehicle!.telemetry,
+          speed: 1.5,
+        },
+      });
+    } else if (command === 'manual-forward') {
+      updateVehicle(vehicleId, {
+        status: 'active',
+        operationalState: 'moving',
+        telemetry: {
+          ...vehicle!.telemetry,
+          speed: 0.5,
+        },
+      });
+    } else if (command === 'manual-reverse') {
+      updateVehicle(vehicleId, {
+        status: 'active',
+        operationalState: 'moving',
+        telemetry: {
+          ...vehicle!.telemetry,
+          speed: -0.5,
+        },
+      });
+    } else if (command === 'manual-stop') {
+      updateVehicle(vehicleId, {
+        telemetry: {
+          ...vehicle!.telemetry,
+          speed: 0,
+        },
+      });
+    } else if (command === 'gripper-open') {
+      updateVehicle(vehicleId, {
+        telemetry: {
+          ...vehicle!.telemetry,
+          gripperStatus: 'disengaged',
+        },
+      });
+    } else if (command === 'gripper-close') {
+      updateVehicle(vehicleId, {
+        telemetry: {
+          ...vehicle!.telemetry,
+          gripperStatus: 'engaged',
+        },
       });
     }
   };
@@ -146,38 +202,75 @@ export default function VehicleControlPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <ViewModeToggle />
-            <Button variant="outline" size="sm">
-              <RefreshCw className="mr-2 size-4" />
-              Refresh
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+              <RefreshCw className={`mr-2 size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          {/* Left Side - Camera Grid, Command Sequences, Control Panel */}
-          <div className="space-y-4">
-            <CameraGrid
-              cameras={vehicle.cameras}
-              vehicleId={vehicle.id}
-              selectedCameraId={selectedCameraId}
-              onCameraSelect={setSelectedCameraId}
-            />
-            <CommandSequencePanel vehicle={vehicle} onCommand={handleCommand} />
-            <ControlPanel vehicle={vehicle} onCommand={handleCommand} />
+        {/* Control Panel Section - Camera Feeds and Controls in 2x2 grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Left column - First two cameras stacked */}
+          <div className="flex flex-col gap-4">
+            {vehicle.cameras.slice(0, 2).map((camera) => (
+              <div
+                key={camera.id}
+                className="relative aspect-video rounded-lg bg-muted overflow-hidden"
+              >
+                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-muted to-muted-foreground/10">
+                  <div className="text-center">
+                    <p className="text-lg font-medium">{camera.label}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {camera.status === 'online' ? 'Live Feed' : 'Offline'}
+                    </p>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 p-3">
+                  <span className="text-sm font-medium text-white">{camera.label}</span>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Right Side - OHT Model, Telemetry */}
-          <div className="space-y-4">
-            <OHTModel
-              cameras={vehicle.cameras}
-              selectedCameraId={selectedCameraId}
-              onCameraSelect={setSelectedCameraId}
-            />
-            <TelemetryPanel vehicle={vehicle} />
+          {/* Right column - Third camera at top, Control Panel below */}
+          <div className="flex flex-col gap-4">
+            {vehicle.cameras.slice(2, 3).map((camera) => (
+              <div
+                key={camera.id}
+                className="relative aspect-video rounded-lg bg-muted overflow-hidden"
+              >
+                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-muted to-muted-foreground/10">
+                  <div className="text-center">
+                    <p className="text-lg font-medium">{camera.label}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {camera.status === 'online' ? 'Live Feed' : 'Offline'}
+                    </p>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 p-3">
+                  <span className="text-sm font-medium text-white">{camera.label}</span>
+                </div>
+              </div>
+            ))}
+            <div className="flex-1">
+              <ControlPanel vehicle={vehicle} onCommand={handleCommand} className="h-full" />
+            </div>
           </div>
         </div>
+
+        {/* Recent Alerts, Vehicle Camera Positions, and Command Sequences */}
+        <div className="grid gap-4 lg:grid-cols-3 *:h-full">
+          <VehicleAlertsPanel vehicleId={vehicle.id} />
+          <OHTModel
+            cameras={vehicle.cameras}
+            selectedCameraId={selectedCameraId}
+            onCameraSelect={setSelectedCameraId}
+          />
+          <CommandSequencePanel vehicle={vehicle} onCommand={handleCommand} />
+        </div>
+
+        {/* Telemetry Panel */}
+        <TelemetryPanel vehicle={vehicle} />
       </div>
     </TooltipProvider>
   );

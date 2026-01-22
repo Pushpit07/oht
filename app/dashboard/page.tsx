@@ -1,71 +1,209 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Search, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Search, AlertTriangle, AlertOctagon, Check, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { StatusCards } from '@/components/dashboard/fleet-overview/status-cards';
-import { VehicleTable } from '@/components/dashboard/fleet-overview/vehicle-table';
-import { AlertsPanel } from '@/components/dashboard/fleet-overview/alerts-panel';
-import { useFleetStore, useFleetSummary } from '@/stores/fleet-store';
-import { mockFleet } from '@/lib/mock-data';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertList } from '@/components/dashboard/alerts/alert-list';
+import { useAlertsStore } from '@/stores/alerts-store';
+import { mockAlerts } from '@/lib/mock-data';
+import type { AlertSeverity } from '@/types/alert';
 
-export default function FleetOverviewPage() {
-  const setVehicles = useFleetStore((s) => s.setVehicles);
-  const getFilteredVehicles = useFleetStore((s) => s.getFilteredVehicles);
-  const searchQuery = useFleetStore((s) => s.searchQuery);
-  const setSearchQuery = useFleetStore((s) => s.setSearchQuery);
-  const summary = useFleetSummary();
+type FilterTab = 'all' | 'unacknowledged' | 'acknowledged' | 'resolved';
 
-  // Initialize with mock data
+export default function AlertsPage() {
+  const [filterTab, setFilterTab] = useState<FilterTab>('all');
+  const [severityFilter, setSeverityFilter] = useState<AlertSeverity | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const setAlerts = useAlertsStore((s) => s.setAlerts);
+  const alerts = useAlertsStore((s) => s.alerts);
+  const activeAlerts = useAlertsStore((s) => s.activeAlerts);
+  const acknowledgeAlert = useAlertsStore((s) => s.acknowledgeAlert);
+  const resolveAlert = useAlertsStore((s) => s.resolveAlert);
+  const unacknowledgedCount = useAlertsStore((s) => s.unacknowledgedCount);
+  const criticalCount = useAlertsStore((s) => s.criticalCount);
+  const warningCount = useAlertsStore((s) => s.warningCount);
+
   useEffect(() => {
-    setVehicles(mockFleet);
-  }, [setVehicles]);
+    setAlerts(mockAlerts);
+  }, [setAlerts]);
 
-  const vehicles = getFilteredVehicles();
+  // Filter alerts based on current filters
+  const filteredAlerts = alerts.filter((alert) => {
+    // Tab filter
+    if (filterTab === 'unacknowledged' && (alert.acknowledged || alert.resolved)) {
+      return false;
+    }
+    if (filterTab === 'acknowledged' && (!alert.acknowledged || alert.resolved)) {
+      return false;
+    }
+    if (filterTab === 'resolved' && !alert.resolved) {
+      return false;
+    }
+
+    // Severity filter
+    if (severityFilter !== 'all' && alert.severity !== severityFilter) {
+      return false;
+    }
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        alert.vehicleId.toLowerCase().includes(query) ||
+        alert.title.toLowerCase().includes(query) ||
+        alert.message.toLowerCase().includes(query)
+      );
+    }
+
+    return true;
+  });
+
+  const handleAcknowledge = (id: string) => {
+    acknowledgeAlert(id, 'operator');
+  };
+
+  const handleResolve = (id: string) => {
+    resolveAlert(id);
+  };
+
+  const handleAcknowledgeAll = () => {
+    alerts
+      .filter((a) => !a.acknowledged && !a.resolved)
+      .forEach((a) => acknowledgeAlert(a.id, 'operator'));
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Fleet Overview</h1>
+          <h1 className="text-2xl font-bold">Alert Center</h1>
           <p className="text-muted-foreground">
-            Monitor and control your OHT fleet in real-time
+            Manage and acknowledge system alerts
           </p>
         </div>
-        <Button variant="outline" size="sm">
-          <RefreshCw className="mr-2 size-4" />
-          Refresh
+
+        <Button
+          variant="outline"
+          onClick={handleAcknowledgeAll}
+          disabled={unacknowledgedCount === 0}
+        >
+          <Check className="mr-2 size-4" />
+          Acknowledge All ({unacknowledgedCount})
         </Button>
       </div>
 
-      {/* Status Cards */}
-      <StatusCards summary={summary} />
-
-      {/* Main Content */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Vehicle Table */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by ID, name, or location..."
-                className="pl-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+      {/* Stats Cards */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
+              <AlertOctagon className="size-6 text-red-500" />
             </div>
-          </div>
-          <VehicleTable vehicles={vehicles} />
-        </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Critical</p>
+              <p className="text-2xl font-bold">{criticalCount}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Alerts Panel */}
-        <div>
-          <AlertsPanel />
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex size-12 items-center justify-center rounded-full bg-yellow-500/10">
+              <AlertTriangle className="size-6 text-yellow-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Warnings</p>
+              <p className="text-2xl font-bold">{warningCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex size-12 items-center justify-center rounded-full bg-orange-500/10">
+              <Clock className="size-6 text-orange-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Unacknowledged</p>
+              <p className="text-2xl font-bold">{unacknowledgedCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex size-12 items-center justify-center rounded-full bg-green-500/10">
+              <Check className="size-6 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Active Alerts</p>
+              <p className="text-2xl font-bold">{activeAlerts.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4">
+        <Tabs
+          value={filterTab}
+          onValueChange={(v) => setFilterTab(v as FilterTab)}
+        >
+          <TabsList>
+            <TabsTrigger value="all">
+              All
+              <Badge variant="secondary" className="ml-2">
+                {alerts.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="unacknowledged">
+              Unacknowledged
+              {unacknowledgedCount > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  {unacknowledgedCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="acknowledged">Acknowledged</TabsTrigger>
+            <TabsTrigger value="resolved">Resolved</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <Tabs
+          value={severityFilter}
+          onValueChange={(v) => setSeverityFilter(v as AlertSeverity | 'all')}
+        >
+          <TabsList>
+            <TabsTrigger value="all">All Severity</TabsTrigger>
+            <TabsTrigger value="critical">Critical</TabsTrigger>
+            <TabsTrigger value="warning">Warning</TabsTrigger>
+            <TabsTrigger value="info">Info</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="relative flex-1 min-w-64">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search alerts..."
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
+
+      {/* Alert List */}
+      <AlertList
+        alerts={filteredAlerts}
+        onAcknowledge={handleAcknowledge}
+        onResolve={handleResolve}
+      />
     </div>
   );
 }

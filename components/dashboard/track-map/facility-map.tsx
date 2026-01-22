@@ -5,6 +5,7 @@ import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { extractVehicleNumber } from '@/lib/constants';
 import type { OHTVehicle } from '@/types/oht';
 
 interface FacilityMapProps {
@@ -244,7 +245,7 @@ export function FacilityMap({
                 textAnchor="middle"
                 className="fill-white text-[8px] font-bold pointer-events-none"
               >
-                {vehicle.id.replace('OHT-', '')}
+                {extractVehicleNumber(vehicle.id)}
               </text>
 
               {/* Direction indicator for moving vehicles */}

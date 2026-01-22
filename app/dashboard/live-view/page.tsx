@@ -84,7 +84,7 @@ export default function LiveViewPage() {
           <div>
             <h1 className="text-xl font-bold">Live Monitoring</h1>
             <p className="text-sm text-muted-foreground">
-              Monitor multiple OHTs simultaneously
+              Monitor multiple vehicles simultaneously
             </p>
           </div>
 

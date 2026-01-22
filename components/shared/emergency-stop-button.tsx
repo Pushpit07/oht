@@ -20,6 +20,7 @@ interface EmergencyStopButtonProps {
   onActivate: () => Promise<void>;
   disabled?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 const HOLD_DURATION = 2000; // 2 seconds
@@ -29,6 +30,7 @@ export function EmergencyStopButton({
   onActivate,
   disabled,
   className,
+  compact,
 }: EmergencyStopButtonProps) {
   const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -83,9 +85,10 @@ export function EmergencyStopButton({
     <>
       <Button
         variant="destructive"
-        size="lg"
+        size={compact ? 'default' : 'lg'}
         className={cn(
-          'relative h-16 w-full overflow-hidden font-bold text-lg',
+          'relative w-full overflow-hidden font-bold',
+          compact ? 'h-9 text-sm' : 'h-16 text-lg',
           isHolding && 'ring-4 ring-red-500/50',
           className
         )}
@@ -103,12 +106,12 @@ export function EmergencyStopButton({
         />
 
         {/* Button content */}
-        <span className="relative z-10 flex flex-col items-center gap-1">
-          <span className="flex items-center gap-2">
-            <OctagonX className="size-6" />
+        <span className={cn('relative z-10 flex items-center justify-center', compact ? 'gap-1.5' : 'flex-col gap-1')}>
+          <span className={cn('flex items-center', compact ? 'gap-1.5' : 'gap-2')}>
+            <OctagonX className={compact ? 'size-4' : 'size-6'} />
             EMERGENCY STOP
           </span>
-          {isHolding && (
+          {isHolding && !compact && (
             <span className="text-xs font-normal opacity-80">
               Hold for {remainingSeconds}s
             </span>

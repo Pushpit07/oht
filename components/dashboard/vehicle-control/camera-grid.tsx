@@ -123,11 +123,8 @@ export function CameraGrid({ cameras, vehicleId, selectedCameraId: externalSelec
     }
   };
 
-  // In quick mode, only show front and down cameras
-  const displayCameras =
-    viewMode === 'quick'
-      ? cameras.filter((c) => c.position === 'front' || c.position === 'down')
-      : cameras;
+  // Show all cameras (front, rear, down)
+  const displayCameras = cameras;
 
   const selectedCamera = cameras.find((c) => c.id === selectedCameraId);
 

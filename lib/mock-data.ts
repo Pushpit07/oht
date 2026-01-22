@@ -1,5 +1,6 @@
 import type { OHTVehicle, OHTStatus, OperationalState, Camera } from '@/types/oht';
 import type { Alert, AlertSeverity, AlertCategory } from '@/types/alert';
+import { formatVehicleId } from '@/lib/constants';
 
 // Helper to generate random values
 const randomBetween = (min: number, max: number) =>
@@ -20,6 +21,15 @@ const generateCameras = (vehicleId: string): Camera[] => [
     status: 'online',
   },
   {
+    id: `${vehicleId}-cam-rear`,
+    label: 'Back Camera',
+    position: 'rear',
+    streamUrl: '/mock-stream/rear',
+    privacyShieldEnabled: true,
+    recording: true,
+    status: 'online',
+  },
+  {
     id: `${vehicleId}-cam-down`,
     label: 'Down Camera',
     position: 'down',
@@ -28,47 +38,11 @@ const generateCameras = (vehicleId: string): Camera[] => [
     recording: true,
     status: 'online',
   },
-  {
-    id: `${vehicleId}-cam-left`,
-    label: 'Left Camera',
-    position: 'left',
-    streamUrl: '/mock-stream/left',
-    privacyShieldEnabled: true,
-    recording: false,
-    status: 'online',
-  },
-  {
-    id: `${vehicleId}-cam-right`,
-    label: 'Right Camera',
-    position: 'right',
-    streamUrl: '/mock-stream/right',
-    privacyShieldEnabled: true,
-    recording: false,
-    status: 'online',
-  },
-  {
-    id: `${vehicleId}-cam-rear`,
-    label: 'Rear Camera',
-    position: 'rear',
-    streamUrl: '/mock-stream/rear',
-    privacyShieldEnabled: true,
-    recording: false,
-    status: 'online',
-  },
-  {
-    id: `${vehicleId}-cam-top`,
-    label: 'Top Camera',
-    position: 'top',
-    streamUrl: '/mock-stream/top',
-    privacyShieldEnabled: true,
-    recording: false,
-    status: 'online',
-  },
 ];
 
 // Generate a single mock vehicle
 const generateVehicle = (index: number): OHTVehicle => {
-  const id = `OHT-${String(index).padStart(2, '0')}`;
+  const id = formatVehicleId(index);
   const statuses: OHTStatus[] = ['active', 'active', 'active', 'idle', 'idle', 'warning', 'critical'];
   const status = randomChoice(statuses);
 
@@ -145,7 +119,14 @@ export const generateMockFleet = (count: number = 12): OHTVehicle[] => {
 export const generateMockAlerts = (vehicles: OHTVehicle[]): Alert[] => {
   const alerts: Alert[] = [];
 
-  vehicles.forEach((vehicle) => {
+  // Baseline maintenance/info alerts for all vehicles
+  const baselineAlerts = [
+    { code: 'M001', title: 'Scheduled Maintenance Due', category: 'mechanical' as const, severity: 'maintenance' as const, message: 'Routine maintenance check scheduled.' },
+    { code: 'I001', title: 'Sensor Calibration Complete', category: 'operational' as const, severity: 'info' as const, message: 'All sensors calibrated successfully.' },
+    { code: 'M002', title: 'Battery Health Check', category: 'mechanical' as const, severity: 'maintenance' as const, message: 'Battery performance within normal parameters.' },
+  ];
+
+  vehicles.forEach((vehicle, index) => {
     if (vehicle.status === 'critical') {
       alerts.push({
         id: `ALERT-${vehicle.id}-CRIT`,
@@ -190,6 +171,44 @@ export const generateMockAlerts = (vehicles: OHTVehicle[]): Alert[] => {
         ],
       });
     }
+
+    // Add baseline alerts for each vehicle (rotating through the baseline types)
+    const baseAlert = baselineAlerts[index % baselineAlerts.length];
+    alerts.push({
+      id: `ALERT-${vehicle.id}-BASE`,
+      vehicleId: vehicle.id,
+      vehicleName: vehicle.name,
+      severity: baseAlert.severity,
+      category: baseAlert.category,
+      code: baseAlert.code,
+      title: baseAlert.title,
+      message: `${vehicle.id}: ${baseAlert.message}`,
+      timestamp: Date.now() - randomBetween(600000, 3600000),
+      acknowledged: true,
+      resolved: false,
+      actions: [
+        { id: '1', label: 'Acknowledge', type: 'acknowledge', automatic: false, requiresConfirmation: false },
+      ],
+    });
+
+    // Add a second baseline alert for variety
+    const secondBaseAlert = baselineAlerts[(index + 1) % baselineAlerts.length];
+    alerts.push({
+      id: `ALERT-${vehicle.id}-BASE2`,
+      vehicleId: vehicle.id,
+      vehicleName: vehicle.name,
+      severity: secondBaseAlert.severity,
+      category: secondBaseAlert.category,
+      code: secondBaseAlert.code,
+      title: secondBaseAlert.title,
+      message: `${vehicle.id}: ${secondBaseAlert.message}`,
+      timestamp: Date.now() - randomBetween(1800000, 7200000),
+      acknowledged: true,
+      resolved: false,
+      actions: [
+        { id: '1', label: 'Acknowledge', type: 'acknowledge', automatic: false, requiresConfirmation: false },
+      ],
+    });
   });
 
   // Sort by severity and timestamp

@@ -1,4 +1,4 @@
-// OHT (Overhead Hoist Transport) Type Definitions
+// Remotify Vehicle Type Definitions
 
 export type OHTStatus = 'active' | 'idle' | 'warning' | 'critical' | 'maintenance' | 'offline';
 
@@ -55,7 +55,7 @@ export interface Task {
   status: 'queued' | 'in-progress' | 'completed' | 'failed';
 }
 
-export type CameraPosition = 'front' | 'down' | 'left' | 'right' | 'rear' | 'top';
+export type CameraPosition = 'front' | 'rear' | 'down';
 
 export interface Camera {
   id: string;

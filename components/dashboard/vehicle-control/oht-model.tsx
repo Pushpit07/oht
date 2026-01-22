@@ -15,10 +15,7 @@ interface OHTModelProps {
 const cameraPositions: Record<CameraPosition, { x: number; y: number; rotation: number }> = {
   front: { x: 100, y: 20, rotation: 0 },
   rear: { x: 100, y: 180, rotation: 180 },
-  left: { x: 20, y: 100, rotation: -90 },
-  right: { x: 180, y: 100, rotation: 90 },
   down: { x: 100, y: 100, rotation: 0 },
-  top: { x: 140, y: 60, rotation: 0 },
 };
 
 interface CameraMarkerProps {
@@ -94,7 +91,7 @@ function CameraMarker({ camera, position, isSelected, onClick }: CameraMarkerPro
             />
           )}
           {/* Direction arrow for directional cameras */}
-          {camera.position !== 'down' && camera.position !== 'top' && (
+          {camera.position !== 'down' && (
             <g transform={`rotate(${position.rotation})`}>
               <path
                 d="M 0 -14 L -4 -10 L 4 -10 Z"
@@ -126,16 +123,16 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
   return (
     <Card>
       <CardHeader className="py-3">
-        <CardTitle className="text-base">OHT Camera Positions</CardTitle>
+        <CardTitle className="text-base">Vehicle Camera Positions</CardTitle>
       </CardHeader>
       <CardContent className="overflow-visible">
-        <div className="flex items-center justify-center overflow-visible">
+        <div className="flex items-center justify-center gap-8 overflow-visible">
           <svg
             viewBox="-20 -20 240 240"
-            className="h-[350px] w-[350px] max-w-full overflow-visible"
-            aria-label="OHT vehicle model with camera positions"
+            className="h-[380px] w-[380px] shrink-0 overflow-visible"
+            aria-label="Vehicle model with camera positions"
           >
-            {/* OHT Body - Top-down view */}
+            {/* Vehicle Body - Top-down view */}
             <defs>
               <linearGradient id="ohtBody" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" className="[stop-color:hsl(var(--muted))]" />
@@ -200,14 +197,6 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
               d="M 100 25 L 95 32 L 105 32 Z"
               className="fill-primary/60"
             />
-            <text
-              x="100"
-              y="12"
-              textAnchor="middle"
-              className="fill-muted-foreground text-[8px] font-medium"
-            >
-              FRONT
-            </text>
 
             {/* Camera markers */}
             {cameras.map((camera) => {
@@ -225,30 +214,30 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
               );
             })}
           </svg>
-        </div>
 
-        {/* Camera legend */}
-        <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-          {cameras.map((camera) => (
-            <button
-              key={camera.id}
-              className={cn(
-                'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
-                camera.id === selectedCameraId
-                  ? 'bg-primary/10 text-primary'
-                  : 'hover:bg-muted'
-              )}
-              onClick={() => onCameraSelect?.(camera.id)}
-            >
-              <span
+          {/* Camera legend - right side */}
+          <div className="flex flex-col gap-2 text-sm">
+            {cameras.map((camera) => (
+              <button
+                key={camera.id}
                 className={cn(
-                  'size-2 rounded-full',
-                  camera.status === 'online' ? 'bg-green-500' : 'bg-muted-foreground'
+                  'flex items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors min-w-[120px]',
+                  camera.id === selectedCameraId
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-muted/50 hover:bg-muted'
                 )}
-              />
-              <span className="truncate capitalize">{camera.position}</span>
-            </button>
-          ))}
+                onClick={() => onCameraSelect?.(camera.id)}
+              >
+                <span
+                  className={cn(
+                    'size-2.5 rounded-full',
+                    camera.status === 'online' ? 'bg-green-500' : 'bg-muted-foreground'
+                  )}
+                />
+                <span className="capitalize font-medium">{camera.position}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

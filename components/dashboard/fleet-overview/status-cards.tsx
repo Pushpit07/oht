@@ -12,7 +12,7 @@ interface StatusCardsProps {
 const cardConfig = [
   {
     key: 'total',
-    label: 'Total OHTs',
+    label: 'Total Vehicles',
     icon: Truck,
     color: 'text-foreground',
     bgColor: 'bg-muted',

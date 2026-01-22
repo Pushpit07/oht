@@ -147,7 +147,7 @@ export default function VehiclesPage() {
         <div>
           <h1 className="text-2xl font-bold">Vehicles</h1>
           <p className="text-muted-foreground">
-            Manage and monitor individual OHT vehicles
+            Manage and monitor individual vehicles
           </p>
         </div>
       </div>

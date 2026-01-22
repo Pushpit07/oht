@@ -265,7 +265,7 @@ export default function SettingsPage() {
                   <div>
                     <p className="font-medium">OPC-UA Server</p>
                     <p className="text-sm text-muted-foreground">
-                      Connection to OHT controller
+                      Connection to vehicle controller
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Namespace</Label>
-                    <Input defaultValue="ns=2;s=OHT" />
+                    <Input defaultValue="ns=2;s=RMT" />
                   </div>
                 </div>
               </div>
