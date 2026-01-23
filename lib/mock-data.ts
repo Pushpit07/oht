@@ -1,4 +1,4 @@
-import type { OHTVehicle, OHTStatus, OperationalState, Camera } from '@/types/oht';
+import type { OHTVehicle, OHTStatus, OperationalState, Camera, SteeringOrientation } from '@/types/oht';
 import type { Alert, AlertSeverity, AlertCategory } from '@/types/alert';
 import { formatVehicleId } from '@/lib/constants';
 
@@ -78,6 +78,15 @@ const generateVehicle = (index: number): OHTVehicle => {
       gripperStatus: isLoaded ? 'engaged' : 'disengaged',
       loadStatus: isLoaded ? 'loaded' : 'empty',
       payloadWeight: isLoaded ? randomBetween(2, 5) : undefined,
+      displayCode: [
+        Math.floor(randomBetween(0, 9)),
+        Math.floor(randomBetween(0, 9)),
+        Math.floor(randomBetween(0, 9)),
+        Math.floor(randomBetween(0, 9)),
+        Math.floor(randomBetween(0, 9)),
+      ] as [number, number, number, number, number],
+      steeringOrientation: randomChoice<SteeringOrientation>(['straight', 'left', 'right']),
+      steeringAngle: operationalState === 'moving' ? randomBetween(-30, 30) : 0,
     },
     safety: {
       estopActive: status === 'critical' && operationalState === 'e-stopped',

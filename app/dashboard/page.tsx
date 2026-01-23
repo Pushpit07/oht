@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertList } from '@/components/dashboard/alerts/alert-list';
 import { useAlertsStore } from '@/stores/alerts-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { mockAlerts } from '@/lib/mock-data';
 import type { AlertSeverity } from '@/types/alert';
 
@@ -27,6 +28,9 @@ export default function AlertsPage() {
   const unacknowledgedCount = useAlertsStore((s) => s.unacknowledgedCount);
   const criticalCount = useAlertsStore((s) => s.criticalCount);
   const warningCount = useAlertsStore((s) => s.warningCount);
+
+  const getCurrentWorker = useAuthStore((s) => s.getCurrentWorker);
+  const currentWorker = getCurrentWorker();
 
   useEffect(() => {
     setAlerts(mockAlerts);
@@ -64,17 +68,17 @@ export default function AlertsPage() {
   });
 
   const handleAcknowledge = (id: string) => {
-    acknowledgeAlert(id, 'operator');
+    acknowledgeAlert(id, currentWorker?.id ?? 'unknown', currentWorker?.shiftId);
   };
 
   const handleResolve = (id: string) => {
-    resolveAlert(id);
+    resolveAlert(id, currentWorker?.id, currentWorker?.shiftId);
   };
 
   const handleAcknowledgeAll = () => {
     alerts
       .filter((a) => !a.acknowledged && !a.resolved)
-      .forEach((a) => acknowledgeAlert(a.id, 'operator'));
+      .forEach((a) => acknowledgeAlert(a.id, currentWorker?.id ?? 'unknown', currentWorker?.shiftId));
   };
 
   return (

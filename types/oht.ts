@@ -22,6 +22,8 @@ export interface Position {
   bay?: string;
 }
 
+export type SteeringOrientation = 'straight' | 'left' | 'right';
+
 export interface Telemetry {
   speed: number; // m/s
   motorTemperature: number; // Celsius
@@ -29,6 +31,9 @@ export interface Telemetry {
   gripperStatus: GripperStatus;
   loadStatus: LoadStatus;
   payloadWeight?: number; // kg
+  displayCode: [number, number, number, number, number]; // 5-digit status display
+  steeringOrientation: SteeringOrientation;
+  steeringAngle: number; // degrees, -45 to 45
 }
 
 export interface SafetyStatus {

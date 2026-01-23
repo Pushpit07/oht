@@ -123,4 +123,15 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Fix for browser autofill styles in dark mode */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px oklch(0.269 0 0) inset !important;
+    -webkit-text-fill-color: oklch(0.985 0 0) !important;
+    caret-color: oklch(0.985 0 0) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }

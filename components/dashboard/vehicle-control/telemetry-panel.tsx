@@ -8,20 +8,20 @@ import {
   Package,
   MapPin,
   Navigation,
-  Clock,
+  type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { OHTVehicle } from '@/types/oht';
+import type { OHTVehicle, SteeringOrientation } from '@/types/oht';
 
 interface TelemetryPanelProps {
   vehicle: OHTVehicle;
 }
 
 interface TelemetryItemProps {
-  icon: React.ElementType;
+  icon: LucideIcon;
   label: string;
   value: string | number;
   unit?: string;
@@ -85,6 +85,120 @@ function TelemetryItem({
   );
 }
 
+// 7-segment display digit component
+function SevenSegmentDigit({ digit }: { digit: number }) {
+  // Segment map: [a, b, c, d, e, f, g] - top, top-right, bottom-right, bottom, bottom-left, top-left, middle
+  const segmentMap: Record<number, boolean[]> = {
+    0: [true, true, true, true, true, true, false],
+    1: [false, true, true, false, false, false, false],
+    2: [true, true, false, true, true, false, true],
+    3: [true, true, true, true, false, false, true],
+    4: [false, true, true, false, false, true, true],
+    5: [true, false, true, true, false, true, true],
+    6: [true, false, true, true, true, true, true],
+    7: [true, true, true, false, false, false, false],
+    8: [true, true, true, true, true, true, true],
+    9: [true, true, true, true, false, true, true],
+  };
+
+  const segments = segmentMap[digit] || segmentMap[0];
+  const onColor = 'bg-red-500';
+  const offColor = 'bg-red-500/20';
+
+  return (
+    <div className="relative w-6 h-10">
+      {/* Segment A - top horizontal */}
+      <div className={cn('absolute top-0 left-1 w-4 h-1 rounded-sm', segments[0] ? onColor : offColor)} />
+      {/* Segment B - top right vertical */}
+      <div className={cn('absolute top-1 right-0 w-1 h-4 rounded-sm', segments[1] ? onColor : offColor)} />
+      {/* Segment C - bottom right vertical */}
+      <div className={cn('absolute bottom-1 right-0 w-1 h-4 rounded-sm', segments[2] ? onColor : offColor)} />
+      {/* Segment D - bottom horizontal */}
+      <div className={cn('absolute bottom-0 left-1 w-4 h-1 rounded-sm', segments[3] ? onColor : offColor)} />
+      {/* Segment E - bottom left vertical */}
+      <div className={cn('absolute bottom-1 left-0 w-1 h-4 rounded-sm', segments[4] ? onColor : offColor)} />
+      {/* Segment F - top left vertical */}
+      <div className={cn('absolute top-1 left-0 w-1 h-4 rounded-sm', segments[5] ? onColor : offColor)} />
+      {/* Segment G - middle horizontal */}
+      <div className={cn('absolute top-1/2 left-1 w-4 h-1 rounded-sm -translate-y-1/2', segments[6] ? onColor : offColor)} />
+    </div>
+  );
+}
+
+// OHT Display emulation showing 5 digits
+function OHTDisplayPanel({ displayCode }: { displayCode: [number, number, number, number, number] }) {
+  return (
+    <div className="rounded-lg bg-neutral-900 p-4 border border-neutral-800">
+      <div className="text-xs text-neutral-500 mb-2 text-center">OHT Status Display</div>
+      <div className="flex items-center justify-center gap-2 bg-neutral-950 rounded px-3 py-2">
+        {displayCode.map((digit, index) => (
+          <SevenSegmentDigit key={index} digit={digit} />
+        ))}
+      </div>
+      <div className="text-[10px] text-neutral-500 mt-2 text-center font-mono">
+        CODE: {displayCode.join('')}
+      </div>
+    </div>
+  );
+}
+
+// Steering orientation indicator
+function SteeringIndicator({ orientation, angle }: { orientation: SteeringOrientation; angle: number }) {
+  return (
+    <div className="rounded-lg bg-muted p-3">
+      <div className="text-xs text-muted-foreground mb-2 text-center">Steering Orientation</div>
+      <div className="flex items-center justify-center gap-4">
+        {/* Steering wheel visualization */}
+        <div className="relative w-16 h-16">
+          <svg viewBox="0 0 64 64" className="w-full h-full">
+            {/* Outer ring */}
+            <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-muted-foreground/30" />
+            {/* Steering wheel with rotation */}
+            <g transform={`rotate(${angle}, 32, 32)`}>
+              {/* Wheel rim */}
+              <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary" />
+              {/* Spokes */}
+              <line x1="32" y1="8" x2="32" y2="24" stroke="currentColor" strokeWidth="3" className="text-primary" strokeLinecap="round" />
+              <line x1="12" y1="44" x2="24" y2="36" stroke="currentColor" strokeWidth="3" className="text-primary" strokeLinecap="round" />
+              <line x1="52" y1="44" x2="40" y2="36" stroke="currentColor" strokeWidth="3" className="text-primary" strokeLinecap="round" />
+              {/* Center hub */}
+              <circle cx="32" cy="32" r="6" fill="currentColor" className="text-primary" />
+            </g>
+          </svg>
+        </div>
+        {/* Direction and angle info */}
+        <div className="text-center">
+          <div className="text-lg font-semibold capitalize">{orientation}</div>
+          <div className="text-sm text-muted-foreground tabular-nums">
+            {angle > 0 ? '+' : ''}{angle.toFixed(1)}°
+          </div>
+        </div>
+      </div>
+      {/* Direction arrows */}
+      <div className="flex items-center justify-center gap-4 mt-2">
+        <div className={cn(
+          'text-xs px-2 py-1 rounded',
+          orientation === 'left' ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+        )}>
+          ← LEFT
+        </div>
+        <div className={cn(
+          'text-xs px-2 py-1 rounded',
+          orientation === 'straight' ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+        )}>
+          ↑ STRAIGHT
+        </div>
+        <div className={cn(
+          'text-xs px-2 py-1 rounded',
+          orientation === 'right' ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+        )}>
+          RIGHT →
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TelemetryPanel({ vehicle }: TelemetryPanelProps) {
   const { telemetry, position, operationalState } = vehicle;
 
@@ -109,6 +223,15 @@ export function TelemetryPanel({ vehicle }: TelemetryPanelProps) {
         <CardTitle className="text-base">Vehicle Telemetry</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* OHT Display and Steering - Side by side */}
+        <div className="grid grid-cols-2 gap-4">
+          <OHTDisplayPanel displayCode={telemetry.displayCode} />
+          <SteeringIndicator
+            orientation={telemetry.steeringOrientation}
+            angle={telemetry.steeringAngle}
+          />
+        </div>
+
         {/* Position */}
         <div className="rounded-lg bg-muted p-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">

@@ -1,5 +1,7 @@
 // Alert Type Definitions
 
+import type { ShiftId } from './worker';
+
 export type AlertSeverity = 'critical' | 'warning' | 'info' | 'maintenance';
 
 export type AlertCategory =
@@ -21,8 +23,11 @@ export interface Alert {
   timestamp: number;
   acknowledged: boolean;
   acknowledgedBy?: string;
+  acknowledgedByShift?: ShiftId;
   acknowledgedAt?: number;
   resolved: boolean;
+  resolvedBy?: string;
+  resolvedByShift?: ShiftId;
   resolvedAt?: number;
   autoEscalateAfter?: number; // seconds
   actions: AlertAction[];

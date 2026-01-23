@@ -1,18 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
   LayoutDashboard,
-  Truck,
-  MonitorPlay,
   Map,
   Bell,
   Settings,
   ChevronLeft,
   ChevronRight,
   Search,
+  BarChart3,
 } from 'lucide-react';
+import { RiRemoteControlLine } from 'react-icons/ri';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,9 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertBanner } from '@/components/dashboard/alerts/alert-banner';
+import { SidebarUserProfile } from '@/components/auth/sidebar-user-profile';
 import { useAlertsStore } from '@/stores/alerts-store';
+import { useAuthStore } from '@/stores/auth-store';
 
 const navigation = [
   {
@@ -32,6 +35,11 @@ const navigation = [
     name: 'Fleet Overview',
     href: '/dashboard/fleet-overview',
     icon: LayoutDashboard,
+  },
+  {
+    name: 'Shift Performance',
+    href: '/dashboard/shift-performance',
+    icon: BarChart3,
   },
   {
     name: 'Search',
@@ -61,9 +69,28 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(true);
   const unacknowledgedCount = useAlertsStore((s) => s.unacknowledgedCount);
   const criticalCount = useAlertsStore((s) => s.criticalCount);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  // Redirect to login if not authenticated (only after hydration)
+  useEffect(() => {
+    if (hasHydrated && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [hasHydrated, isAuthenticated, router]);
+
+  // Show loading while hydrating or if not authenticated
+  if (!hasHydrated || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -71,7 +98,7 @@ export default function DashboardLayout({
         {/* Sidebar */}
         <aside
           className={cn(
-            'flex flex-col border-r border-border bg-sidebar transition-all duration-300',
+            'flex flex-col border-r border-border bg-sidebar transition-all duration-300 overflow-visible',
             collapsed ? 'w-16' : 'w-64'
           )}
         >
@@ -80,7 +107,7 @@ export default function DashboardLayout({
             {!collapsed && (
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
-                  <Truck className="size-5 text-primary-foreground" />
+                  <RiRemoteControlLine className="size-5 text-primary-foreground" />
                 </div>
                 <span className="font-semibold text-sidebar-foreground">
                   Remotify
@@ -102,8 +129,8 @@ export default function DashboardLayout({
           </div>
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 py-4">
-            <nav className="space-y-1 px-2">
+          <ScrollArea className="flex-1 py-4 overflow-visible">
+            <nav className="space-y-1 px-2 overflow-visible">
               {navigation.map((item) => {
                 const isActive =
                   (item.href === '/dashboard' && pathname === '/dashboard') ||
@@ -116,7 +143,7 @@ export default function DashboardLayout({
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors relative',
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors relative overflow-visible',
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
@@ -129,7 +156,7 @@ export default function DashboardLayout({
                         variant={criticalCount > 0 ? 'destructive' : 'default'}
                         className={cn(
                           'ml-auto',
-                          collapsed && 'absolute -right-1 -top-1 size-5 p-0 flex items-center justify-center text-xs'
+                          collapsed && 'absolute -right-0.5 top-0 size-4 p-0 flex items-center justify-center text-[10px]'
                         )}
                       >
                         {unacknowledgedCount}
@@ -154,7 +181,7 @@ export default function DashboardLayout({
             </nav>
           </ScrollArea>
 
-          {/* Footer */}
+          {/* Footer - Settings */}
           <div className="border-t border-border p-2">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -175,6 +202,11 @@ export default function DashboardLayout({
                 </TooltipContent>
               )}
             </Tooltip>
+          </div>
+
+          {/* User Profile */}
+          <div className="border-t border-border">
+            <SidebarUserProfile collapsed={collapsed} />
           </div>
         </aside>
 

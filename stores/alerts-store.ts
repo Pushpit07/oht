@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Alert, AlertSeverity, AlertFilter } from '@/types/alert';
+import type { ShiftId } from '@/types/worker';
 
 interface AlertsState {
   // Data
@@ -19,8 +20,8 @@ interface AlertsState {
   setAlerts: (alerts: Alert[]) => void;
   addAlert: (alert: Alert) => void;
   updateAlert: (id: string, data: Partial<Alert>) => void;
-  acknowledgeAlert: (id: string, operatorId: string) => void;
-  resolveAlert: (id: string) => void;
+  acknowledgeAlert: (id: string, operatorId: string, shiftId?: ShiftId) => void;
+  resolveAlert: (id: string, workerId?: string, shiftId?: ShiftId) => void;
   dismissAlert: (id: string) => void;
   setFilter: (filter: Partial<AlertFilter>) => void;
   clearFilter: () => void;
@@ -85,7 +86,7 @@ export const useAlertsStore = create<AlertsState>((set, get) => ({
     });
   },
 
-  acknowledgeAlert: (id, operatorId) => {
+  acknowledgeAlert: (id, operatorId, shiftId) => {
     set((state) => {
       const alerts = state.alerts.map((a) =>
         a.id === id
@@ -93,6 +94,7 @@ export const useAlertsStore = create<AlertsState>((set, get) => ({
               ...a,
               acknowledged: true,
               acknowledgedBy: operatorId,
+              acknowledgedByShift: shiftId,
               acknowledgedAt: Date.now(),
             }
           : a
@@ -102,11 +104,17 @@ export const useAlertsStore = create<AlertsState>((set, get) => ({
     });
   },
 
-  resolveAlert: (id) => {
+  resolveAlert: (id, workerId, shiftId) => {
     set((state) => {
       const alerts = state.alerts.map((a) =>
         a.id === id
-          ? { ...a, resolved: true, resolvedAt: Date.now() }
+          ? {
+              ...a,
+              resolved: true,
+              resolvedBy: workerId,
+              resolvedByShift: shiftId,
+              resolvedAt: Date.now(),
+            }
           : a
       );
       const derived = calculateDerivedState(alerts);

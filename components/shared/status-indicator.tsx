@@ -16,7 +16,7 @@ const statusConfig: Record<OHTStatus, { color: string; label: string; pulse?: bo
   warning: { color: 'bg-yellow-500', label: 'Warning', pulse: true },
   critical: { color: 'bg-red-500', label: 'Critical', pulse: true },
   maintenance: { color: 'bg-purple-500', label: 'Maintenance' },
-  offline: { color: 'bg-gray-500', label: 'Offline' },
+  offline: { color: 'bg-neutral-500', label: 'Offline' },
 };
 
 const sizeConfig = {
