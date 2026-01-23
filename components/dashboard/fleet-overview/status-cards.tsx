@@ -49,7 +49,7 @@ const cardConfig = [
 
 export function StatusCards({ summary }: StatusCardsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-5">
       {cardConfig.map((config) => {
         const Icon = config.icon;
         const value = summary[config.key];

@@ -126,10 +126,10 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
         <CardTitle className="text-base">Vehicle Camera Positions</CardTitle>
       </CardHeader>
       <CardContent className="overflow-visible">
-        <div className="flex items-center justify-center gap-8 overflow-visible">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 overflow-visible">
           <svg
             viewBox="-20 -20 240 240"
-            className="h-[380px] w-[380px] shrink-0 overflow-visible"
+            className="h-[280px] w-[280px] md:h-[380px] md:w-[380px] shrink-0 overflow-visible"
             aria-label="Vehicle model with camera positions"
           >
             {/* Vehicle Body - Top-down view */}
@@ -215,13 +215,13 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
             })}
           </svg>
 
-          {/* Camera legend - right side */}
-          <div className="flex flex-col gap-2 text-sm">
+          {/* Camera legend - below on mobile, right side on desktop */}
+          <div className="flex flex-row md:flex-col gap-2 text-sm">
             {cameras.map((camera) => (
               <button
                 key={camera.id}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-4 py-3 text-left transition-colors min-w-[120px]',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 md:px-4 md:py-3 text-left transition-colors md:min-w-[120px]',
                   camera.id === selectedCameraId
                     ? 'bg-primary/10 text-primary'
                     : 'bg-muted/50 hover:bg-muted'
@@ -234,7 +234,7 @@ export function OHTModel({ cameras, selectedCameraId, onCameraSelect }: OHTModel
                     camera.status === 'online' ? 'bg-green-500' : 'bg-muted-foreground'
                   )}
                 />
-                <span className="capitalize font-medium">{camera.position}</span>
+                <span className="capitalize font-medium text-xs md:text-sm">{camera.position}</span>
               </button>
             ))}
           </div>

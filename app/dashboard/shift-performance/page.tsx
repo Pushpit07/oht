@@ -71,12 +71,12 @@ export default function ShiftPerformancePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 md:gap-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Shift Performance</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold">Shift Performance</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Track problem resolution by shift
             {lastUpdated && (
               <span className="ml-2 text-xs">• Updated {formatTimeAgo(lastUpdated)}</span>
@@ -88,6 +88,7 @@ export default function ShiftPerformancePage() {
           size="sm"
           onClick={refreshData}
           disabled={isRefreshing}
+          className="w-full sm:w-auto"
         >
           <RefreshCw className={`size-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh Data
@@ -95,7 +96,7 @@ export default function ShiftPerformancePage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex size-12 items-center justify-center rounded-full bg-green-500/10">
@@ -158,7 +159,7 @@ export default function ShiftPerformancePage() {
       </div>
 
       {/* Chart and Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <PerformanceChart performances={shiftPerformances} />
 
         {/* Recent Resolutions */}

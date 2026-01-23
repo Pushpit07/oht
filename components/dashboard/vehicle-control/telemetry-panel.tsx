@@ -223,8 +223,8 @@ export function TelemetryPanel({ vehicle }: TelemetryPanelProps) {
         <CardTitle className="text-base">Vehicle Telemetry</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* OHT Display and Steering - Side by side */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* OHT Display and Steering - Side by side on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <OHTDisplayPanel displayCode={telemetry.displayCode} />
           <SteeringIndicator
             orientation={telemetry.steeringOrientation}

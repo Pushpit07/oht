@@ -179,7 +179,7 @@ export default function VehicleControlPage() {
       <div className="flex flex-col gap-4 p-4 lg:p-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
               <Link href="/vehicles">
                 <ChevronLeft className="size-5" />
@@ -192,7 +192,7 @@ export default function VehicleControlPage() {
                 <p className="text-sm text-muted-foreground">{vehicle.name}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <SafetyBadge safety={vehicle.safety} />
               <ConnectionBadge status={vehicle.safety.connectionStatus} />
               <Badge variant="outline" className="capitalize">
@@ -209,8 +209,8 @@ export default function VehicleControlPage() {
           </div>
         </div>
 
-        {/* Control Panel Section - Camera Feeds and Controls in 2x2 grid */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Control Panel Section - Camera Feeds and Controls in 2x2 grid on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Left column - First two cameras stacked */}
           <div className="flex flex-col gap-4">
             {vehicle.cameras.slice(0, 2).map((camera) => (

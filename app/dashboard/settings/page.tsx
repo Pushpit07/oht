@@ -31,16 +31,16 @@ export default function SettingsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 md:gap-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold">Settings</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Configure your dashboard preferences
           </p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Save className="mr-2 size-4" />
           Save Changes
         </Button>
@@ -48,22 +48,22 @@ export default function SettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="general" className="gap-2">
+        <TabsList className="flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="general" className="gap-2 text-xs md:text-sm">
             <Monitor className="size-4" />
-            General
+            <span className="hidden sm:inline">General</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2">
+          <TabsTrigger value="notifications" className="gap-2 text-xs md:text-sm">
             <Bell className="size-4" />
-            Notifications
+            <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="gap-2">
+          <TabsTrigger value="security" className="gap-2 text-xs md:text-sm">
             <Shield className="size-4" />
-            Security
+            <span className="hidden sm:inline">Security</span>
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="gap-2">
+          <TabsTrigger value="integrations" className="gap-2 text-xs md:text-sm">
             <Database className="size-4" />
-            Integrations
+            <span className="hidden sm:inline">Integrations</span>
           </TabsTrigger>
         </TabsList>
 
@@ -218,17 +218,19 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="rounded-lg border p-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                    <User className="size-6" />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                      <User className="size-6" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">Operator Account</p>
+                      <p className="text-sm text-muted-foreground">
+                        operator@infineon.com
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">Operator Account</p>
-                    <p className="text-sm text-muted-foreground">
-                      operator@infineon.com
-                    </p>
-                  </div>
-                  <Button variant="outline">Change Password</Button>
+                  <Button variant="outline" className="w-full sm:w-auto">Change Password</Button>
                 </div>
               </div>
 

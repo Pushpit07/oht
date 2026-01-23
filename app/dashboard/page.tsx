@@ -82,12 +82,12 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 md:gap-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Alert Center</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold">Alert Center</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Manage and acknowledge system alerts
           </p>
         </div>
@@ -96,6 +96,7 @@ export default function AlertsPage() {
           variant="outline"
           onClick={handleAcknowledgeAll}
           disabled={unacknowledgedCount === 0}
+          className="w-full sm:w-auto"
         >
           <Check className="mr-2 size-4" />
           Acknowledge All ({unacknowledgedCount})
@@ -103,7 +104,7 @@ export default function AlertsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">

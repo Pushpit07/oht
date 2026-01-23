@@ -29,35 +29,35 @@ export default function TrackMapPage() {
     <TooltipProvider>
       <div className="flex h-full flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex flex-col gap-4 border-b px-4 md:px-6 py-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-xl font-bold">Track Map</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-lg md:text-xl font-bold">Track Map</h1>
+            <p className="text-xs md:text-sm text-muted-foreground">
               Real-time facility overview with {summary.total} vehicles
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="size-3 rounded-full bg-green-500" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex flex-wrap gap-3 md:gap-4 text-xs md:text-sm">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="size-2.5 md:size-3 rounded-full bg-green-500" />
                 <span>{summary.active} Active</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-3 rounded-full bg-blue-500" />
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="size-2.5 md:size-3 rounded-full bg-blue-500" />
                 <span>{summary.idle} Idle</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-3 rounded-full bg-yellow-500" />
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="size-2.5 md:size-3 rounded-full bg-yellow-500" />
                 <span>{summary.warning} Warning</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="size-3 rounded-full bg-red-500" />
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="size-2.5 md:size-3 rounded-full bg-red-500" />
                 <span>{summary.critical} Critical</span>
               </div>
             </div>
 
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               <RefreshCw className="mr-2 size-4" />
               Refresh
             </Button>
@@ -65,7 +65,7 @@ export default function TrackMapPage() {
         </div>
 
         {/* Map */}
-        <div className="relative flex-1 p-4">
+        <div className="relative flex-1 p-2 md:p-4">
           <FacilityMap
             vehicles={vehicles}
             onVehicleClick={setSelectedVehicleId}

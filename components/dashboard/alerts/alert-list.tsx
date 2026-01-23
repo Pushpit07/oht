@@ -73,8 +73,8 @@ export function AlertList({ alerts, onAcknowledge, onResolve }: AlertListProps) 
   }
 
   return (
-    <div className="rounded-lg border">
-      <Table>
+    <div className="rounded-lg border overflow-x-auto">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-12"></TableHead>

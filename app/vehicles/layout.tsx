@@ -12,6 +12,8 @@ import {
   ChevronRight,
   Search,
   BarChart3,
+  Menu,
+  X,
 } from 'lucide-react';
 import { RiRemoteControlLine } from 'react-icons/ri';
 import { useState } from 'react';
@@ -61,10 +63,16 @@ export default function VehiclesLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const unacknowledgedCount = useAlertsStore((s) => s.unacknowledgedCount);
   const criticalCount = useAlertsStore((s) => s.criticalCount);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Redirect to login if not authenticated (only after hydration)
   useEffect(() => {
@@ -85,15 +93,53 @@ export default function VehiclesLayout({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex h-screen bg-background">
-        {/* Sidebar */}
+        {/* Mobile Header */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-border bg-sidebar px-4 md:hidden">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
+              <RiRemoteControlLine className="size-5 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-sidebar-foreground">Remotify</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-sidebar-foreground relative"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            {!mobileMenuOpen && unacknowledgedCount > 0 && (
+              <Badge
+                variant={criticalCount > 0 ? 'destructive' : 'default'}
+                className="absolute -right-1 -top-1 size-4 p-0 flex items-center justify-center text-[10px]"
+              >
+                {unacknowledgedCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Sidebar - Hidden on mobile, shown as overlay when menu open */}
         <aside
           className={cn(
             'flex flex-col border-r border-border bg-sidebar transition-all duration-300 overflow-visible',
-            collapsed ? 'w-16' : 'w-64'
+            // Desktop styles
+            'hidden md:flex',
+            collapsed ? 'md:w-16' : 'md:w-64',
+            // Mobile styles - slide in from left
+            mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 flex w-64 pt-14'
           )}
         >
-          {/* Logo */}
-          <div className="flex h-16 items-center justify-between border-b border-border px-4">
+          {/* Logo - Desktop only */}
+          <div className="hidden md:flex h-16 items-center justify-between border-b border-border px-4">
             {!collapsed && (
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
@@ -131,6 +177,7 @@ export default function VehiclesLayout({
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors relative overflow-visible',
                       isActive
@@ -139,13 +186,13 @@ export default function VehiclesLayout({
                     )}
                   >
                     <Icon className="size-5 shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
+                    {(!collapsed || mobileMenuOpen) && <span>{item.name}</span>}
                     {showBadge && (
                       <Badge
                         variant={criticalCount > 0 ? 'destructive' : 'default'}
                         className={cn(
                           'ml-auto',
-                          collapsed && 'absolute -right-0.5 top-0 size-4 p-0 flex items-center justify-center text-[10px]'
+                          collapsed && !mobileMenuOpen && 'absolute -right-0.5 top-0 size-4 p-0 flex items-center justify-center text-[10px]'
                         )}
                       >
                         {unacknowledgedCount}
@@ -154,7 +201,7 @@ export default function VehiclesLayout({
                   </Link>
                 );
 
-                if (collapsed) {
+                if (collapsed && !mobileMenuOpen) {
                   return (
                     <Tooltip key={item.name}>
                       <TooltipTrigger asChild>{navItem}</TooltipTrigger>
@@ -176,16 +223,17 @@ export default function VehiclesLayout({
               <TooltipTrigger asChild>
                 <Link
                   href="/dashboard/settings"
+                  onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors',
-                    collapsed && 'justify-center'
+                    collapsed && !mobileMenuOpen && 'justify-center'
                   )}
                 >
                   <Settings className="size-5" />
-                  {!collapsed && <span>Settings</span>}
+                  {(!collapsed || mobileMenuOpen) && <span>Settings</span>}
                 </Link>
               </TooltipTrigger>
-              {collapsed && (
+              {collapsed && !mobileMenuOpen && (
                 <TooltipContent side="right">
                   <p>Settings</p>
                 </TooltipContent>
@@ -195,12 +243,12 @@ export default function VehiclesLayout({
 
           {/* User Profile */}
           <div className="border-t border-border">
-            <SidebarUserProfile collapsed={collapsed} />
+            <SidebarUserProfile collapsed={collapsed && !mobileMenuOpen} />
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="flex flex-1 flex-col overflow-hidden">
+        <main className="flex flex-1 flex-col overflow-hidden pt-14 md:pt-0">
           {/* Alert Banner */}
           <AlertBanner />
 

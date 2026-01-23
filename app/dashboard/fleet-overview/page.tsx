@@ -25,16 +25,16 @@ export default function FleetOverviewPage() {
   const vehicles = getFilteredVehicles();
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 md:gap-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Fleet Overview</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold">Fleet Overview</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Monitor and control your fleet in real-time
           </p>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="w-full sm:w-auto">
           <RefreshCw className="mr-2 size-4" />
           Refresh
         </Button>
@@ -44,7 +44,7 @@ export default function FleetOverviewPage() {
       <StatusCards summary={summary} />
 
       {/* Main Content */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Vehicle Table */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-4">
