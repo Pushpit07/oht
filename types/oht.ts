@@ -67,6 +67,7 @@ export interface Camera {
   label: string;
   position: CameraPosition;
   streamUrl?: string;
+  whepStreamName?: string;
   privacyShieldEnabled: boolean;
   recording: boolean;
   status: 'online' | 'offline' | 'error';

@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MediaMTX WebRTC 2 Cams</title>
+    <style>
+      body { font-family: sans-serif; margin: 16px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .card { border: 1px solid #ddd; border-radius: 10px; padding: 10px; }
+      video { width: 100%; background: #000; border-radius: 10px; }
+      pre { white-space: pre-wrap; background: #f7f7f7; padding: 10px; border-radius: 10px; }
+    </style>
+  </head>
+  <body>
+    <h3>MediaMTX WebRTC (WHEP) – 2 Kameras</h3>
+
+    <div class="grid">
+      <div class="card">
+        <div><b>cam1</b></div>
+        <video id="v1" autoplay playsinline muted></video>
+        <pre id="log1"></pre>
+      </div>
+      <div class="card">
+        <div><b>cam2</b></div>
+        <video id="v2" autoplay playsinline muted></video>
+        <pre id="log2"></pre>
+      </div>
+    </div>
+
+    <script>
+      const PI_IP = "192.168.137.159";
+      const CAM1_WHEP = `http://${PI_IP}:8889/cam1/whep`;
+      const CAM2_WHEP = `http://${PI_IP}:8889/cam2/whep`;
+
+      function makeLogger(preEl) {
+        return (...a) => {
+          console.log(...a);
+          preEl.textContent += a.join(" ") + "\n";
+        };
+      }
+
+      async function waitIceComplete(pc) {
+        if (pc.iceGatheringState === "complete") return;
+        await new Promise((resolve) => {
+          pc.addEventListener("icegatheringstatechange", () => {
+            if (pc.iceGatheringState === "complete") resolve();
+          });
+        });
+      }
+
+      async function startWHEP({ url, videoEl, logEl }) {
+        const log = makeLogger(logEl);
+
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.addTransceiver("video", { direction: "recvonly" });
+
+        pc.oniceconnectionstatechange = () => log("ice:", pc.iceConnectionState);
+        pc.onconnectionstatechange = () => log("conn:", pc.connectionState);
+
+        pc.ontrack = (ev) => {
+          log("ontrack");
+          videoEl.srcObject = ev.streams[0];
+        };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await waitIceComplete(pc);
+
+        log("POST WHEP...");
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/sdp" },
+          body: pc.localDescription.sdp
+        });
+
+        log("WHEP:", res.status, res.statusText);
+        const answer = await res.text();
+        if (!res.ok) {
+          log("ERR body:", answer);
+          throw new Error("WHEP failed");
+        }
+
+        await pc.setRemoteDescription({ type: "answer", sdp: answer });
+        log("connected (waiting for media)...");
+        return pc;
+      }
+
+      (async () => {
+        try {
+          await startWHEP({
+            url: CAM1_WHEP,
+            videoEl: document.getElementById("v1"),
+            logEl: document.getElementById("log1")
+          });
+        } catch (e) {
+          document.getElementById("log1").textContent += "ERROR: " + e.message + "\n";
+        }
+
+        try {
+          await startWHEP({
+            url: CAM2_WHEP,
+            videoEl: document.getElementById("v2"),
+            logEl: document.getElementById("log2")
+          });
+        } catch (e) {
+          document.getElementById("log2").textContent += "ERROR: " + e.message + "\n";
+        }
+      })();
+    </script>
+  </body>
+</html>

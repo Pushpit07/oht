@@ -12,6 +12,7 @@ import { ControlPanel } from '@/components/dashboard/vehicle-control/control-pan
 import { CommandSequencePanel } from '@/components/dashboard/vehicle-control/command-sequence-panel';
 import { OHTModel } from '@/components/dashboard/vehicle-control/oht-model';
 import { VehicleAlertsPanel } from '@/components/dashboard/vehicle-control/vehicle-alerts-panel';
+import { CameraFeed } from '@/components/webrtc/camera-feed';
 import { StatusIndicator } from '@/components/shared/status-indicator';
 import { SafetyBadge, ConnectionBadge } from '@/components/shared/safety-badge';
 import { useFleetStore } from '@/stores/fleet-store';
@@ -209,64 +210,31 @@ export default function VehicleControlPage() {
           </div>
         </div>
 
-        {/* Control Panel Section - Camera Feeds and Controls in 2x2 grid on desktop, stacked on mobile */}
+        {/* Camera Feeds - 2 cameras side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left column - First two cameras stacked */}
-          <div className="flex flex-col gap-4">
-            {vehicle.cameras.slice(0, 2).map((camera) => (
-              <div
-                key={camera.id}
-                className="relative aspect-video rounded-lg bg-muted overflow-hidden"
-              >
-                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-muted to-muted-foreground/10">
-                  <div className="text-center">
-                    <p className="text-lg font-medium">{camera.label}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {camera.status === 'online' ? 'Live Feed' : 'Offline'}
-                    </p>
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 p-3">
-                  <span className="text-sm font-medium text-white">{camera.label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Right column - Third camera at top, Control Panel below */}
-          <div className="flex flex-col gap-4">
-            {vehicle.cameras.slice(2, 3).map((camera) => (
-              <div
-                key={camera.id}
-                className="relative aspect-video rounded-lg bg-muted overflow-hidden"
-              >
-                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-muted to-muted-foreground/10">
-                  <div className="text-center">
-                    <p className="text-lg font-medium">{camera.label}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {camera.status === 'online' ? 'Live Feed' : 'Offline'}
-                    </p>
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 p-3">
-                  <span className="text-sm font-medium text-white">{camera.label}</span>
-                </div>
-              </div>
-            ))}
-            <div className="flex-1">
-              <ControlPanel vehicle={vehicle} onCommand={handleCommand} className="h-full" />
-            </div>
-          </div>
+          {vehicle.cameras.slice(0, 2).map((camera) => (
+            <CameraFeed
+              key={camera.id}
+              camera={camera}
+              className="aspect-video"
+            />
+          ))}
         </div>
 
-        {/* Recent Alerts, Vehicle Camera Positions, and Command Sequences */}
-        <div className="grid gap-4 lg:grid-cols-3 *:h-full">
+        {/* Control Panel and Command Sequences side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ControlPanel vehicle={vehicle} onCommand={handleCommand} />
+          <CommandSequencePanel vehicle={vehicle} onCommand={handleCommand} />
+        </div>
+
+        {/* Recent Alerts and Vehicle Camera Positions */}
+        <div className="grid gap-4 lg:grid-cols-2 *:h-full">
           <VehicleAlertsPanel vehicleId={vehicle.id} />
           <OHTModel
             cameras={vehicle.cameras}
             selectedCameraId={selectedCameraId}
             onCameraSelect={setSelectedCameraId}
           />
-          <CommandSequencePanel vehicle={vehicle} onCommand={handleCommand} />
         </div>
 
         {/* Telemetry Panel */}
