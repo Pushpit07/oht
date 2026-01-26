@@ -65,7 +65,7 @@ export default function LoginPage() {
               <RiRemoteControlLine className="size-8 text-primary-foreground" />
             </div>
             <div className="text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-white">Remotify</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-white">CamsOnaBox</h1>
               <p className="text-neutral-400">OHT Fleet Management</p>
             </div>
           </div>

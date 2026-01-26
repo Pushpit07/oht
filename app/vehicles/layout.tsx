@@ -99,7 +99,7 @@ export default function VehiclesLayout({
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
               <RiRemoteControlLine className="size-5 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-sidebar-foreground">Remotify</span>
+            <span className="font-semibold text-sidebar-foreground">CamsOnaBox</span>
           </Link>
           <Button
             variant="ghost"
@@ -146,7 +146,7 @@ export default function VehiclesLayout({
                   <RiRemoteControlLine className="size-5 text-primary-foreground" />
                 </div>
                 <span className="font-semibold text-sidebar-foreground">
-                  Remotify
+                  CamsOnaBox
                 </span>
               </Link>
             )}

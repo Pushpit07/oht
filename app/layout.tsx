@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Remotify - Infineon",
+  title: "CamsOnaBox - Infineon",
   description: "Remote Vehicle Monitoring and Control System",
 };
 

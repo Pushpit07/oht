@@ -1,4 +1,4 @@
-// Remotify Vehicle Type Definitions
+// CamsOnaBox Vehicle Type Definitions
 
 export type OHTStatus = 'active' | 'idle' | 'warning' | 'critical' | 'maintenance' | 'offline';
 
