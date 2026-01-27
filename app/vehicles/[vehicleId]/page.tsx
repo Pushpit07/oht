@@ -12,6 +12,7 @@ import { ControlPanel } from '@/components/dashboard/vehicle-control/control-pan
 import { CommandSequencePanel } from '@/components/dashboard/vehicle-control/command-sequence-panel';
 import { OHTModel } from '@/components/dashboard/vehicle-control/oht-model';
 import { VehicleAlertsPanel } from '@/components/dashboard/vehicle-control/vehicle-alerts-panel';
+import { AISummaryPanel } from '@/components/dashboard/vehicle-control/ai-summary-panel';
 import { CameraFeed } from '@/components/webrtc/camera-feed';
 import { StatusIndicator } from '@/components/shared/status-indicator';
 import { SafetyBadge, ConnectionBadge } from '@/components/shared/safety-badge';
@@ -209,6 +210,9 @@ export default function VehicleControlPage() {
             </Button>
           </div>
         </div>
+
+        {/* AI Summary */}
+        <AISummaryPanel vehicle={vehicle} />
 
         {/* Camera Feeds - 2 cameras side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
